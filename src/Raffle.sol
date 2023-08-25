@@ -57,7 +57,7 @@ contract Raffle is VRFConsumerBaseV2 {
     uint32 private immutable i_callbackGasLimit;
     uint64 private immutable i_subscriptionId;
     uint256 private immutable i_enteranceFee;
-    uint256 private immutable i_durationInSeconds;
+    uint256 private immutable i_interval;
 
     uint256 private s_lastTimeStamp;
     address payable[] private s_participants;
@@ -73,14 +73,14 @@ contract Raffle is VRFConsumerBaseV2 {
 
     constructor(
         uint256 _enteranceFee,
-        uint256 _durationInSeconds,
+        uint256 _interval,
         address _vrfCoordinator,
         bytes32 _keyHash,
         uint32 _callbackGasLimit,
         uint64 _subscriptionId
     ) VRFConsumerBaseV2(_vrfCoordinator) {
         i_enteranceFee = _enteranceFee;
-        i_durationInSeconds = _durationInSeconds;
+        i_interval = _interval;
         i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
         i_keyHash = _keyHash;
         i_callbackGasLimit = _callbackGasLimit;
@@ -99,8 +99,7 @@ contract Raffle is VRFConsumerBaseV2 {
     function checkUpkeep(
         bytes memory /* checkData */
     ) public view returns (bool upkeepNeeded, bytes memory /** performData */) {
-        bool timeHasPassed = (block.timestamp - s_lastTimeStamp) >
-            i_durationInSeconds;
+        bool timeHasPassed = (block.timestamp - s_lastTimeStamp) > i_interval;
         bool hasParticipants = s_participants.length > 0;
         bool isOpen = s_raffleState == RaffleState.OPEN;
         bool balance = address(this).balance > 0;
