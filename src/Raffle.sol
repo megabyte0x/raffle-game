@@ -150,4 +150,8 @@ contract Raffle is VRFConsumerBaseV2 {
 
         emit Raffle__WinnerPicked(winner);
     }
+
+    function getRaffleState() public view returns (RaffleState) {
+        return s_raffleState;
+    }
 }
