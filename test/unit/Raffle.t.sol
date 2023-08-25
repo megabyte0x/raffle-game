@@ -7,6 +7,9 @@ import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 
 contract RaffleTest is Test {
+    // Events
+    event Raffle__ParticipantEntered(address indexed participant);
+
     Raffle raffle;
     HelperConfig helperConfig;
 
@@ -49,5 +52,12 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: _enteranceFee}();
         assert(raffle.getParticipantsLength() == 1);
         assert(raffle.getParticipant(0) == JIM);
+    }
+
+    function testEmitsEventWhenEnter() public {
+        vm.prank(JIM);
+        vm.expectEmit(true, false, false, false, address(raffle));
+        emit Raffle__ParticipantEntered(JIM);
+        raffle.enterRaffle{value: _enteranceFee}();
     }
 }
