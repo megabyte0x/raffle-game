@@ -31,9 +31,16 @@ contract RaffleTest is Test {
             _callbackGasLimit,
             _subscriptionId
         ) = helperConfig.activeConfig();
+        vm.deal(JIM, JIM_INITIAL_BALANCE);
     }
 
     function testInitialisesAtOpenState() public view {
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
+    }
+
+    function testRaffleRevertsWhenNotEnoughFundsProvided() public {
+        vm.prank(JIM);
+        vm.expectRevert(Raffle.Raffle__IncorrectEnteranceFee.selector);
+        raffle.enterRaffle{value: 0.0001 ether}();
     }
 }
