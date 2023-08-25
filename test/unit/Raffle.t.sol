@@ -43,4 +43,11 @@ contract RaffleTest is Test {
         vm.expectRevert(Raffle.Raffle__IncorrectEnteranceFee.selector);
         raffle.enterRaffle{value: 0.0001 ether}();
     }
+
+    function testRaffleRecordsWhenPlayerEnter() public {
+        vm.prank(JIM);
+        raffle.enterRaffle{value: _enteranceFee}();
+        assert(raffle.getParticipantsLength() == 1);
+        assert(raffle.getParticipant(0) == JIM);
+    }
 }
