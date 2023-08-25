@@ -19,11 +19,14 @@
 // private
 // view & pure functions
 
+// CEI: Checks, Effects, Interactions
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import {AutomationRegistryInterface, State, Config} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_2.sol";
 
 /**
  * @title Raffle
@@ -36,12 +39,16 @@ contract Raffle is VRFConsumerBaseV2 {
     error Raffle__IncorrectEnteranceFee();
     error Raffle__TransferFailed();
     error Raffle__NotOpen();
+    error Raffle__UpkeepNotNeeded(
+        uint256 balance,
+        uint256 state,
+        uint256 participantsLength
+    );
 
     /** Type Declarations */
     enum RaffleState {
         OPEN,
-        CALCULATING_WINNER,
-        CLOSED
+        CALCULATING_WINNER
     }
 
     // State variables
@@ -89,12 +96,32 @@ contract Raffle is VRFConsumerBaseV2 {
         emit Raffle__ParticipantEntered(msg.sender);
     }
 
-    function pickWinner() external {
-        if ((block.timestamp - s_lastTimeStamp) < i_durationInSeconds) {
-            revert();
+    function checkUpkeep(
+        bytes memory /* checkData */
+    ) public view returns (bool upkeepNeeded, bytes memory /** performData */) {
+        bool timeHasPassed = (block.timestamp - s_lastTimeStamp) >
+            i_durationInSeconds;
+        bool hasParticipants = s_participants.length > 0;
+        bool isOpen = s_raffleState == RaffleState.OPEN;
+        bool balance = address(this).balance > 0;
+
+        upkeepNeeded = (timeHasPassed && hasParticipants && isOpen && balance);
+
+        return (upkeepNeeded, "");
+    }
+
+    function performUpkeep(bytes calldata /* performData */) external {
+        (bool upkeepNeeded, ) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Raffle__UpkeepNotNeeded(
+                address(this).balance,
+                uint256(s_raffleState),
+                s_participants.length
+            );
         }
+
         s_raffleState = RaffleState.CALCULATING_WINNER;
-        uint256 requestId = i_vrfCoordinator.requestRandomWords(
+        i_vrfCoordinator.requestRandomWords(
             i_keyHash,
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
