@@ -1,9 +1,17 @@
-# What it can do?
+# Raffle Game
 
-1. User can enter by paying for the tickets.
-   1. The ticket fee are going to the winner during the draw.
-2. After X period of time, lottery will draw a winner.
-   1. This will be done programmatically.
-3. Using Chainlink VRF and Automation
-   1. VRF -> Randomness
-   2. Automation -> Time based tigger.
+## About the Project
+
+This repo contains basic smart contract for the raffle game. The game is simple, you buy a ticket and wait for the raffle to end. If you are the winner, you get the prize.
+
+The winner is selected by the random number generated using **Chainlink VRF** and the function to pick function is called using **Chainlink Automation.**
+
+## Tests
+
+![Tests](/assets/coverage.png)
+
+This projects have all testcases written in Solidty using **Foundry.**
+
+- [x] [Unit Testing](/test/unit)
+- [] Integration Testing
+- [] Forked Testing
