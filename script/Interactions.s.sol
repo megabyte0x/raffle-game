@@ -11,7 +11,7 @@ contract CreateSubscription is Script {
     function createSubscriptionUsingConfigs() public returns (uint64) {
         HelperConfig helperConfig = new HelperConfig();
         (, , address _vrfCoordinator, , , , ) = helperConfig.activeConfig();
-        createSubscription(_vrfCoordinator);
+        return createSubscription(_vrfCoordinator);
     }
 
     function createSubscription(

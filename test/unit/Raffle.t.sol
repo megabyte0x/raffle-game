@@ -78,4 +78,66 @@ contract RaffleTest is Test {
         vm.prank(JIM);
         raffle.enterRaffle{value: _enteranceFee}();
     }
+
+    ////////////
+    ////Check Upkeep//////
+    /////////////////////
+
+    // function testCheckUpKeepRevertsIfNotEnoughTimeHasPassed() public {
+    //     vm.prank(JIM);
+    //     vm.expectRevert(Raffle.Raffle__UpkeepNotNeeded.selector);
+    //     raffle.checkUpkeep("");
+    // }
+
+    function testCheckUpKeepIsFalseIfNoBalanceAvailable() public {
+        // Arrange
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(upKeepNeeded == false);
+    }
+
+    function testCheckUpKeepIsFalseIfRaffleIsNotOpen() public {
+        // Arrange
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+        raffle.enterRaffle{value: _enteranceFee}();
+        raffle.performUpkeep("");
+
+        // ACT
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(upKeepNeeded == false);
+    }
+
+    function testCheckUpKeepIsFalseIfTimeHasntPassed() public {
+        // Arrange
+        vm.warp(block.timestamp + _interval - 2);
+        vm.roll(block.number + 1);
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(upKeepNeeded == false);
+    }
+
+    function testCheckUpKeepIsTrueIfEverythingIsCorrect() public {
+        // Arrange
+        vm.prank(JIM);
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+        raffle.enterRaffle{value: _enteranceFee}();
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(upKeepNeeded == true);
+    }
 }
