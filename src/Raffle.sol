@@ -70,6 +70,7 @@ contract Raffle is VRFConsumerBaseV2 {
     // Events
     event Raffle__ParticipantEntered(address indexed participant);
     event Raffle__WinnerPicked(address indexed winner);
+    event Raffle__PerformUpkeep(uint256 indexed requestId);
 
     constructor(
         uint256 _enteranceFee,
@@ -120,13 +121,15 @@ contract Raffle is VRFConsumerBaseV2 {
         }
 
         s_raffleState = RaffleState.CALCULATING_WINNER;
-        i_vrfCoordinator.requestRandomWords(
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash,
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
             i_callbackGasLimit,
             NUM_WORDS
         );
+
+        emit Raffle__PerformUpkeep(requestId);
     }
 
     function getEnteranceFee() external view returns (uint256) {

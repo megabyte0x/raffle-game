@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {Raffle} from "../../src/Raffle.sol";
 import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 contract RaffleTest is Test {
     // Events
@@ -79,15 +80,9 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: _enteranceFee}();
     }
 
-    ////////////
+    //////////////////////
     ////Check Upkeep//////
     /////////////////////
-
-    // function testCheckUpKeepRevertsIfNotEnoughTimeHasPassed() public {
-    //     vm.prank(JIM);
-    //     vm.expectRevert(Raffle.Raffle__UpkeepNotNeeded.selector);
-    //     raffle.checkUpkeep("");
-    // }
 
     function testCheckUpKeepIsFalseIfNoBalanceAvailable() public {
         // Arrange
@@ -101,11 +96,19 @@ contract RaffleTest is Test {
         assert(upKeepNeeded == false);
     }
 
-    function testCheckUpKeepIsFalseIfRaffleIsNotOpen() public {
-        // Arrange
+    modifier raffleEnteredAndTimePassed() {
+        vm.prank(JIM);
         vm.warp(block.timestamp + _interval + 1);
         vm.roll(block.number + 1);
         raffle.enterRaffle{value: _enteranceFee}();
+        _;
+    }
+
+    function testCheckUpKeepIsFalseIfRaffleIsNotOpen()
+        public
+        raffleEnteredAndTimePassed
+    {
+        // Arrange
         raffle.performUpkeep("");
 
         // ACT
@@ -127,17 +130,64 @@ contract RaffleTest is Test {
         assert(upKeepNeeded == false);
     }
 
-    function testCheckUpKeepIsTrueIfEverythingIsCorrect() public {
-        // Arrange
-        vm.prank(JIM);
-        vm.warp(block.timestamp + _interval + 1);
-        vm.roll(block.number + 1);
-        raffle.enterRaffle{value: _enteranceFee}();
-
+    function testCheckUpKeepIsTrueIfEverythingIsCorrect()
+        public
+        raffleEnteredAndTimePassed
+    {
         // Act
         (bool upKeepNeeded, ) = raffle.checkUpkeep("");
 
         // Assert
         assert(upKeepNeeded == true);
+    }
+
+    //////////////////////
+    ////Perform Upkeep//////
+    /////////////////////
+
+    function testPerformUpKeepRevertIfCheckUpKeepIsTrue()
+        public
+        raffleEnteredAndTimePassed
+    {
+        // ACT
+        raffle.performUpkeep("");
+    }
+
+    function testPerformUpKeepRevertIfCheckUpKeepIsFalse() public {
+        // Arrange
+        uint256 balance = 0;
+        uint256 length = 0;
+        uint256 state = 0;
+
+        // ACT
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Raffle.Raffle__UpkeepNotNeeded.selector,
+                balance,
+                length,
+                state
+            )
+        );
+        raffle.performUpkeep("");
+    }
+
+    function testPerformUpKeepUpdatesRaffleStateAndEmitsRequestId()
+        public
+        raffleEnteredAndTimePassed
+    {
+        // ACT
+        vm.recordLogs();
+        raffle.performUpkeep("");
+        Vm.Log[] memory enteries = vm.getRecordedLogs();
+        bytes32 requestId = enteries[1].topics[1];
+
+        Raffle.RaffleState state = raffle.getRaffleState();
+
+        assert(uint256(requestId) > 0);
+        assert(state == Raffle.RaffleState.CALCULATING_WINNER);
+    }
+
+    function testEnteranceFee() public view {
+        assert(raffle.getEnteranceFee() == _enteranceFee);
     }
 }
