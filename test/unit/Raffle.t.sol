@@ -19,6 +19,7 @@ contract RaffleTest is Test {
     uint256 _enteranceFee;
     uint256 _interval;
     address _vrfCoordinator;
+    address _linkToken;
     bytes32 _keyHash;
     uint32 _callbackGasLimit;
     uint64 _subscriptionId;
@@ -30,6 +31,7 @@ contract RaffleTest is Test {
             _enteranceFee,
             _interval,
             _vrfCoordinator,
+            _linkToken,
             _keyHash,
             _callbackGasLimit,
             _subscriptionId
@@ -40,6 +42,10 @@ contract RaffleTest is Test {
     function testInitialisesAtOpenState() public view {
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
+
+    ////////////////////////////////
+    //////////Enter Raffle Tests////
+    ////////////////////////////////
 
     function testRaffleRevertsWhenNotEnoughFundsProvided() public {
         vm.prank(JIM);
@@ -58,6 +64,18 @@ contract RaffleTest is Test {
         vm.prank(JIM);
         vm.expectEmit(true, false, false, false, address(raffle));
         emit Raffle__ParticipantEntered(JIM);
+        raffle.enterRaffle{value: _enteranceFee}();
+    }
+
+    function testCantEnterWhenPickingWinner() public {
+        vm.prank(JIM);
+        raffle.enterRaffle{value: _enteranceFee}();
+        vm.warp(block.timestamp + _interval + 1);
+        vm.roll(block.number + 1);
+        raffle.performUpkeep("");
+
+        vm.expectRevert(Raffle.Raffle__NotOpen.selector);
+        vm.prank(JIM);
         raffle.enterRaffle{value: _enteranceFee}();
     }
 }
