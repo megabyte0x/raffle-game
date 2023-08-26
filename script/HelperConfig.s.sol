@@ -14,6 +14,7 @@ contract HelperConfig is Script {
         bytes32 _keyHash;
         uint32 _callbackGasLimit;
         uint64 _subscriptionId;
+        uint256 _deployerKey;
     }
 
     NetworkConfig public activeConfig;
@@ -28,7 +29,7 @@ contract HelperConfig is Script {
 
     function getSepoliaETHConfig()
         public
-        pure
+        view
         returns (NetworkConfig memory sepoliaConfigs)
     {
         sepoliaConfigs = NetworkConfig({
@@ -38,7 +39,8 @@ contract HelperConfig is Script {
             _linkToken: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
             _keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             _callbackGasLimit: 200000,
-            _subscriptionId: 4776
+            _subscriptionId: 4776,
+            _deployerKey: vm.envUint("PRIVATE_KEY")
         });
     }
 
@@ -72,7 +74,8 @@ contract HelperConfig is Script {
                 _linkToken: address(linkToken),
                 _keyHash: 0x9d1f7f8c5d0e2d5bfae9362ebd1a2c401d0e9a0d14f5d9f0c0c0a4d9d9c5e7c7,
                 _callbackGasLimit: 200000,
-                _subscriptionId: 0
+                _subscriptionId: 0,
+                _deployerKey: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
             });
     }
 }

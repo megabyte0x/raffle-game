@@ -16,14 +16,16 @@ contract DeployRaffle is Script {
             address _linkToken,
             bytes32 _keyHash,
             uint32 _callbackGasLimit,
-            uint64 _subscriptionId
+            uint64 _subscriptionId,
+            uint256 _deployerKey
         ) = helperConfig.activeConfig();
 
         if (_subscriptionId == 0) {
             //creating a subscription id
             CreateSubscription createSubscription = new CreateSubscription();
             _subscriptionId = createSubscription.createSubscription(
-                _vrfCoordinator
+                _vrfCoordinator,
+                _deployerKey
             );
 
             //funding the subscription
@@ -31,7 +33,8 @@ contract DeployRaffle is Script {
             fundSubscription.fundSubscription(
                 _vrfCoordinator,
                 _linkToken,
-                _subscriptionId
+                _subscriptionId,
+                _deployerKey
             );
         }
 
@@ -52,7 +55,8 @@ contract DeployRaffle is Script {
         addConsumer.addConsumer(
             _vrfCoordinator,
             _subscriptionId,
-            address(raffle)
+            address(raffle),
+            _deployerKey
         );
 
         return (raffle, helperConfig);

@@ -26,6 +26,7 @@ contract RaffleTest is Test {
     bytes32 _keyHash;
     uint32 _callbackGasLimit;
     uint64 _subscriptionId;
+    uint256 _deployerKey;
 
     function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
@@ -37,7 +38,9 @@ contract RaffleTest is Test {
             _linkToken,
             _keyHash,
             _callbackGasLimit,
-            _subscriptionId
+            _subscriptionId,
+            // _deployerKey
+
         ) = helperConfig.activeConfig();
         vm.deal(JIM, JIM_INITIAL_BALANCE);
     }
@@ -155,7 +158,7 @@ contract RaffleTest is Test {
         raffle.performUpkeep("");
     }
 
-    function testPerformUpKeepRevertIfCheckUpKeepIsFalse() public {
+    function testPerformUpKeepRevertIfCheckUpKeepIsFalse() public skipFork {
         // Arrange
         uint256 balance = 0;
         uint256 length = 0;
@@ -199,13 +202,20 @@ contract RaffleTest is Test {
 
     function testFulfillRandomWordsRevertsIfPerformUpKeepNotCalledBefore(
         uint256 _requestId
-    ) public {
+    ) public skipFork {
         // Arrange
         vm.expectRevert("nonexistent request");
         VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(
             _requestId,
             address(raffle)
         );
+    }
+
+    modifier skipFork() {
+        if (block.chainid == 11155111) {
+            return;
+        }
+        _;
     }
 
     modifier sentThePrizeMoneyToTheWinner() {
@@ -234,6 +244,7 @@ contract RaffleTest is Test {
 
     function testFulfillRandomWordsShouldSentThePrizeMoneyToTheWinner()
         public
+        skipFork
         raffleEnteredAndTimePassed
         sentThePrizeMoneyToTheWinner
     {
@@ -250,6 +261,7 @@ contract RaffleTest is Test {
 
     function testFulfillRandomWordsShouldUpdateTheRecentWinner()
         public
+        skipFork
         raffleEnteredAndTimePassed
         sentThePrizeMoneyToTheWinner
     {
@@ -259,6 +271,7 @@ contract RaffleTest is Test {
 
     function testFulfillRandomWordsShouldUpdateTheStateToOpen()
         public
+        skipFork
         raffleEnteredAndTimePassed
         sentThePrizeMoneyToTheWinner
     {
@@ -268,6 +281,7 @@ contract RaffleTest is Test {
 
     function testFulfillRandomWordsShouldUpdateTheParticipantsLengthToZero()
         public
+        skipFork
         raffleEnteredAndTimePassed
         sentThePrizeMoneyToTheWinner
     {
@@ -278,6 +292,7 @@ contract RaffleTest is Test {
     function testFulfillRandomWordsShouldUpdateTheLastTimeStamp()
         public
         raffleEnteredAndTimePassed
+        skipFork
     {
         // ARRANGE
         uint256 additionalParticipant = 5;
@@ -307,6 +322,7 @@ contract RaffleTest is Test {
     function testFulfillRandomWordsShouldEmitWinnersAddress()
         public
         raffleEnteredAndTimePassed
+        skipFork
     {
         // ARRANGE
         uint256 additionalParticipant = 5;
