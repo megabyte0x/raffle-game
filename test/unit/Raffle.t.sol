@@ -40,7 +40,6 @@ contract RaffleTest is Test {
             _callbackGasLimit,
             _subscriptionId,
             // _deployerKey
-
         ) = helperConfig.activeConfig();
         vm.deal(JIM, JIM_INITIAL_BALANCE);
     }
@@ -95,7 +94,7 @@ contract RaffleTest is Test {
         vm.roll(block.number + 1);
 
         // Act
-        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
 
         // Assert
         assert(upKeepNeeded == false);
@@ -109,15 +108,12 @@ contract RaffleTest is Test {
         _;
     }
 
-    function testCheckUpKeepIsFalseIfRaffleIsNotOpen()
-        public
-        raffleEnteredAndTimePassed
-    {
+    function testCheckUpKeepIsFalseIfRaffleIsNotOpen() public raffleEnteredAndTimePassed {
         // Arrange
         raffle.performUpkeep("");
 
         // ACT
-        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
 
         // Assert
         assert(upKeepNeeded == false);
@@ -129,18 +125,15 @@ contract RaffleTest is Test {
         vm.roll(block.number + 1);
 
         // Act
-        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
 
         // Assert
         assert(upKeepNeeded == false);
     }
 
-    function testCheckUpKeepIsTrueIfEverythingIsCorrect()
-        public
-        raffleEnteredAndTimePassed
-    {
+    function testCheckUpKeepIsTrueIfEverythingIsCorrect() public raffleEnteredAndTimePassed {
         // Act
-        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+        (bool upKeepNeeded,) = raffle.checkUpkeep("");
 
         // Assert
         assert(upKeepNeeded == true);
@@ -150,10 +143,7 @@ contract RaffleTest is Test {
     ////Perform Upkeep//////
     /////////////////////
 
-    function testPerformUpKeepSuccessfullIfCheckUpKeepIsTrue()
-        public
-        raffleEnteredAndTimePassed
-    {
+    function testPerformUpKeepSuccessfullIfCheckUpKeepIsTrue() public raffleEnteredAndTimePassed {
         // ACT
         raffle.performUpkeep("");
     }
@@ -165,21 +155,11 @@ contract RaffleTest is Test {
         uint256 state = 0;
 
         // ACT
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Raffle.Raffle__UpkeepNotNeeded.selector,
-                balance,
-                length,
-                state
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Raffle.Raffle__UpkeepNotNeeded.selector, balance, length, state));
         raffle.performUpkeep("");
     }
 
-    function testPerformUpKeepUpdatesRaffleStateAndEmitsRequestId()
-        public
-        raffleEnteredAndTimePassed
-    {
+    function testPerformUpKeepUpdatesRaffleStateAndEmitsRequestId() public raffleEnteredAndTimePassed {
         // ACT
         vm.recordLogs();
         raffle.performUpkeep("");
@@ -200,15 +180,10 @@ contract RaffleTest is Test {
     ///////////Fulfill Random Words////////
     ///////////////////////////////////////
 
-    function testFulfillRandomWordsRevertsIfPerformUpKeepNotCalledBefore(
-        uint256 _requestId
-    ) public skipFork {
+    function testFulfillRandomWordsRevertsIfPerformUpKeepNotCalledBefore(uint256 _requestId) public skipFork {
         // Arrange
         vm.expectRevert("nonexistent request");
-        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(
-            _requestId,
-            address(raffle)
-        );
+        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(_requestId, address(raffle));
     }
 
     modifier skipFork() {
@@ -235,10 +210,7 @@ contract RaffleTest is Test {
         bytes32 _requestId = enteries[1].topics[1];
 
         // ACT
-        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(
-            uint256(_requestId),
-            address(raffle)
-        );
+        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(uint256(_requestId), address(raffle));
         _;
     }
 
@@ -253,10 +225,7 @@ contract RaffleTest is Test {
         uint256 totalPrizeMoney = _enteranceFee * (additionalParticipant + 1);
 
         // ASSERT
-        assert(
-            raffle.getRecentWinner().balance ==
-                totalPrizeMoney + JIM_INITIAL_BALANCE - _enteranceFee
-        );
+        assert(raffle.getRecentWinner().balance == totalPrizeMoney + JIM_INITIAL_BALANCE - _enteranceFee);
     }
 
     function testFulfillRandomWordsShouldUpdateTheRecentWinner()
@@ -289,11 +258,7 @@ contract RaffleTest is Test {
         assert(raffle.getParticipantsLength() == 0);
     }
 
-    function testFulfillRandomWordsShouldUpdateTheLastTimeStamp()
-        public
-        raffleEnteredAndTimePassed
-        skipFork
-    {
+    function testFulfillRandomWordsShouldUpdateTheLastTimeStamp() public raffleEnteredAndTimePassed skipFork {
         // ARRANGE
         uint256 additionalParticipant = 5;
         uint256 startingIndex = 1;
@@ -310,20 +275,13 @@ contract RaffleTest is Test {
         uint256 previousTimeStamp = raffle.getLastTimeStamp();
 
         // ACT
-        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(
-            uint256(_requestId),
-            address(raffle)
-        );
+        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(uint256(_requestId), address(raffle));
 
         // ASSERT
         assert(raffle.getLastTimeStamp() > previousTimeStamp);
     }
 
-    function testFulfillRandomWordsShouldEmitWinnersAddress()
-        public
-        raffleEnteredAndTimePassed
-        skipFork
-    {
+    function testFulfillRandomWordsShouldEmitWinnersAddress() public raffleEnteredAndTimePassed skipFork {
         // ARRANGE
         uint256 additionalParticipant = 5;
         uint256 startingIndex = 1;
@@ -340,10 +298,7 @@ contract RaffleTest is Test {
 
         // ACT
         vm.recordLogs();
-        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(
-            uint256(_requestId),
-            address(raffle)
-        );
+        VRFCoordinatorV2Mock(_vrfCoordinator).fulfillRandomWords(uint256(_requestId), address(raffle));
         enteries = vm.getRecordedLogs();
         bytes32 winner = enteries[1].topics[1];
 

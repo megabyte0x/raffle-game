@@ -27,11 +27,7 @@ contract HelperConfig is Script {
         }
     }
 
-    function getSepoliaETHConfig()
-        public
-        view
-        returns (NetworkConfig memory sepoliaConfigs)
-    {
+    function getSepoliaETHConfig() public view returns (NetworkConfig memory sepoliaConfigs) {
         sepoliaConfigs = NetworkConfig({
             _enteranceFee: 0.01 ether,
             _interval: 30,
@@ -44,10 +40,7 @@ contract HelperConfig is Script {
         });
     }
 
-    function getOrCreateAnvilETHConfig()
-        public
-        returns (NetworkConfig memory anvilConfigs)
-    {
+    function getOrCreateAnvilETHConfig() public returns (NetworkConfig memory anvilConfigs) {
         if (activeConfig._vrfCoordinator != address(0)) {
             return activeConfig;
         }
@@ -66,16 +59,15 @@ contract HelperConfig is Script {
 
         vm.stopBroadcast();
 
-        return
-            NetworkConfig({
-                _enteranceFee: 0.01 ether,
-                _interval: 30,
-                _vrfCoordinator: address(vrfCoordinatorMock),
-                _linkToken: address(linkToken),
-                _keyHash: 0x9d1f7f8c5d0e2d5bfae9362ebd1a2c401d0e9a0d14f5d9f0c0c0a4d9d9c5e7c7,
-                _callbackGasLimit: 200000,
-                _subscriptionId: 0,
-                _deployerKey: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-            });
+        return NetworkConfig({
+            _enteranceFee: 0.01 ether,
+            _interval: 30,
+            _vrfCoordinator: address(vrfCoordinatorMock),
+            _linkToken: address(linkToken),
+            _keyHash: 0x9d1f7f8c5d0e2d5bfae9362ebd1a2c401d0e9a0d14f5d9f0c0c0a4d9d9c5e7c7,
+            _callbackGasLimit: 200000,
+            _subscriptionId: 0,
+            _deployerKey: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+        });
     }
 }
