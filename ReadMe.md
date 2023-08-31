@@ -15,3 +15,7 @@ This projects have all testcases written in Solidty using **Foundry.**
 - [x] [Unit Testing](/test/unit)
 - [] Integration Testing
 - [] Forked Testing
+
+## Contracts
+
+- The Raffle contract is deployed on [Sepolia](https://sepolia.etherscan.io/address/0x7fd2ad5d302a61cfdc6832585896c2261b0882ad)
